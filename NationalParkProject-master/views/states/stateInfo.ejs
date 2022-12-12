@@ -1,0 +1,60 @@
+<%- include('./partials/header.ejs')%>
+    <title> State information </title>
+
+  <body>
+    <div class="stateName">
+      <%= state.name%></div>
+
+    <div id="map"></div>
+    <script>
+      var NPMap = {
+        div: 'map',
+        locateControl: true, //allows user to specify location
+        zoom: 6, //preset zoom on map
+        center: {
+          lat: '<%= state.lat%>',
+          lng: '<%= state.long%>'
+        },
+        baseLayers: [ //design of map
+          'nps-parkTiles3'
+        ],
+        hashControl: true, //updates browser url zoom and long/lat
+        overlays: [{  //add more layers to the base map (popups, pinpoints, etc.)
+          preset: 'nps-places-pois', //uses unit codes to place points of interests on the map(visiting centers, campgrounds etc.)
+          unitCodes: [
+            'grsm'
+          ]
+        }]
+      };
+
+      (function () {
+        var s = document.createElement('script');
+        s.src = 'https://www.nps.gov/lib/npmap.js/4.0.0/npmap-bootstrap.js';
+        document.body.appendChild(s);
+      })();
+    </script>
+    <script>
+      (function fetchData() {
+        fetch('https://developer.nps.gov/api/v1/parks?stateCode=<%= state.value %>&api_key=9pmlVnQfy5VVDKxPYb8Du9UOMm6e5Nem5dGuLJL1')
+          .then(res => {
+            return res.json();
+          })
+          .then((res) => {
+            const data = res.data;
+            for (data.park of data) {
+              console.log(data.park);
+              // append data to div class called info
+              var tag = document.createElement("p");
+              var text = document.createTextNode(data.park.fullName);
+              tag.appendChild(text);
+              var element = document.getElementById("info");
+              element.appendChild(tag);
+            }
+          })
+          .catch(error => console.log(error));
+    })();
+    </script>
+    <div class="info" id="info">
+      
+    </div>
+    <%- include('./partials/footer.ejs')%>
